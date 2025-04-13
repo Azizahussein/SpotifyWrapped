@@ -1,0 +1,29 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 30px 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+   .logo {
+    color: white;
+    font-size: 2em;
+    font-weight: bold;
+  }
+   .left,
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+  }
+   .menu {
+    display: flex;
+    gap: 20px;
+  }
+
+   .option:hover {
+    color: #6367bc;
+  }
+ 

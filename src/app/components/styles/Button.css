@@ -1,0 +1,12 @@
+.nbtn {
+  background:rgb(7, 57, 149) 100%;        
+  padding: 10px 30px;
+  font-size: 1rem;
+  border-radius: 500px;
+
+}
+
+.nbtn:hover {
+  background: #001f4d; 
+  box-shadow: 0 0 12px rgba(0, 100, 150, 0.6);
+}

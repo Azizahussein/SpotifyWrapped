@@ -1,0 +1,117 @@
+.page {
+  display: flex;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: #f7f7f8;
+}
+
+.box {
+  width: 100%;
+  max-width: 350px;
+  padding: 50px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 20px 20px 20px  rgba(0, 0, 0, 0.1);
+  color:black;
+}
+
+.box h1 {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px;
+
+}
+
+.text {
+  text-align: center;
+  font-size: 15px;
+  margin-bottom: 30px;
+}
+
+.box input {
+  width: 100%;
+  font-size: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid grey;
+}
+
+.btn {
+  background-color: #6c3de4;
+  color: white;
+  padding: 10px;
+  border: 1px solid  #2f0696;
+  border-radius: 6px;
+  font-weight: bold;
+  width: 100%;
+}
+
+.btn:hover {
+  background-color: #5a2dbe;
+}
+
+.link {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.link a {
+  color: #6c3de4;
+  font-weight: bold;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}
+
+.login {
+  
+  background: linear-gradient(135deg, #6c3de4, #8a4de8);
+  color: white;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome {
+  text-align: center;
+  padding: 50px;
+}
+
+.welcome h2 {
+  font-size: 40px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.welcome h2 span {
+  font-style: italic;
+  color: #4419a7;
+}
+
+.welcome p {
+  font-size: 19px;
+  color: #f1f1f1;
+}
+
+
+.back {
+  display: inline-block;
+  margin-bottom: 30px;
+  color: #000000;
+  font-size: 14px;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+

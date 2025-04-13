@@ -1,0 +1,122 @@
+.page {
+  display: flex;
+  height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  background-color: #f7f7f8;
+}
+
+.box {
+  width: 100%;
+  max-width: 350px;
+  padding: 50px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 20px 20px 20px rgba(0, 0, 0, 0.1);
+  color: black;
+  position: relative;
+}
+
+
+.back:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.box h1 {
+  text-align: center;
+  font-size: 30px;
+  margin-bottom: 30px;
+}
+
+.text {
+  text-align: center;
+  font-size: 15px;
+  margin-bottom: 30px;
+}
+
+.box input {
+  width: 100%;
+  font-size: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid grey;
+}
+
+.btn {
+  background-color: #6c3de4;
+  color: white;
+  padding: 10px;
+  border: 1px solid #2f0696;
+  border-radius: 6px;
+  font-weight: bold;
+  width: 100%;
+  margin-bottom: 10px;
+  
+}
+
+.btn:hover {
+  background-color: #5a2dbe;
+}
+
+.btn.google {
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.btn.google:hover {
+  background-color: #f1f1f1;
+}
+
+.link {
+  text-align: center;
+  font-size: 12px;
+  margin-top: 20px;
+}
+
+.link a {
+  color: #6c3de4;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.link a:hover {
+  text-decoration: underline;
+}
+
+.login {
+  background: linear-gradient(135deg, #6c3de4, #8a4de8);
+  color: white;
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome {
+  text-align: center;
+  padding: 50px;
+}
+
+.welcome h2 {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.welcome h2 span {
+  font-style: italic;
+  color: #4419a7;
+}
+
+.welcome p {
+  font-size: 16px;
+  color: #f1f1f1;
+}
