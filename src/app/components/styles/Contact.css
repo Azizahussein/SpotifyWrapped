@@ -1,0 +1,104 @@
+/* Gradient background styling */
+body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(
+    circle,
+    rgba(178, 131, 214, 1) 0%,
+    rgba(119, 41, 179, 1) 50%,
+    rgba(7, 51, 133, 1) 100%
+  );
+  color: white;
+  font-family: sans-serif;
+}
+
+/* Main section styling */
+.section {
+  padding: 4rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Animated header */
+.section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+/* Bounce animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Contact box */
+.contact-box {
+  background-color: rgba(255, 255, 255, 0.95);
+  color: black;
+  border-radius: 10px;
+  padding: 2rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+/* Form layout */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.form-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+/* Button styling */
+.form button {
+  background: white;
+  color: #0083b0;
+  padding: 12px 28px;
+  border-radius: 25px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form button:hover {
+  background: linear-gradient(
+    90deg,
+    rgb(22, 19, 96) 0%,
+    rgb(60, 50, 150) 25%,
+    rgb(109, 109, 236) 50%,
+    rgb(70, 130, 180) 75%,
+    rgba(0, 100, 150, 1) 100%
+  );
+  color: white;
+  box-shadow: 0 0 12px rgba(0, 100, 150, 0.6);
+}
+
+  
