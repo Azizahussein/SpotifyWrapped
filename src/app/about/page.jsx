@@ -8,11 +8,11 @@ import "../components/styles/Navbar.css";
 
 const About = () => {
   const team = [
-    { name: "Alex Duong", role: "Frontend", genre: "KPop" },
-    { name: "Arvin Ezhilan", role: "Backend", genre: "Rap" },
     { name: "Aziza Hussein", role: "Frontend", genre: "Pop" },
+    { name: "Arvin Ezhilan", role: "Backend", genre: "Rap" },
+    { name: "Alex Duong", role: "Frontend", genre: "KPop" },
     { name: "Mathew Uliasz", role: "Backend", genre: "EDM" },
-    { name: "Jainil Patel", role: "Full Stack Dev", genre: "EDM" }
+    { name: "Jainil Patel", role: "Full Stack Dev", genre: "Indie" }
   ];
 
   return (
