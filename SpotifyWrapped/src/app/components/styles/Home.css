@@ -1,0 +1,61 @@
+.home {
+    height: 100vh;
+    background: #b283d6;
+    background: radial-gradient(circle, rgba(178, 131, 214, 1) 0%, rgba(119, 41, 179, 1) 50%, rgba(7, 51, 133, 1) 100%);
+display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+   
+  }
+  
+  .section {
+    max-width: 600px;
+    padding: 0 30px;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .section h1 {
+    font-size: 4rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    animation: bounce 2s infinite;
+  }
+  
+  .section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .getstarted {
+    background: white;
+    color: #0083b0;
+    padding: 12px 28px;
+    border-radius: 25px;
+    font-size: 1rem;
+
+  }
+  
+  .getstarted:hover {
+    background: linear-gradient(
+        90deg,
+        rgb(22, 19, 96) 0%, rgb(60, 50, 150) 25%, rgb(109, 109, 236) 50%,rgb(70, 130, 180) 75%,rgba(0, 100, 150, 1) 100%
+      );
+      ;
+    color: white;
+    box-shadow: 0 0 12px rgba(0, 100, 150, 0.6);
+  }
+  

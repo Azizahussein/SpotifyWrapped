@@ -1,0 +1,526 @@
+require('dotenv').config();
+const express = require('express');
+const passport = require('passport');
+const session = require('express-session');
+const SpotifyStrategy = require('passport-spotify').Strategy;
+const mongoose = require('mongoose');
+const User = require('./models/User');
+const bcrypt = require('bcrypt');
+const cors = require('cors');
+const app = express();
+// Basic test route
+
+// Load environment variables
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import authRoutes from './routes/auth.js';
+import spotifyRoutes from './routes/spotify.js';
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wrapped_db';
+
+// Middleware
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true
+}));
+app.use(express.json());
+
+// Connect to MongoDB
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/spotify', spotifyRoutes);
+
+// Basic health check route
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+export default app;
+
+// Connect to MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  retryWrites: true,
+  w: 'majority',
+  ssl: true
+})
+.then(() => console.log('MongoDB Connected'))
+.catch(err => console.error('MongoDB Connection Error:', err));
+
+// Configure Passport
+passport.serializeUser((user, done) => {
+  console.log('Serializing user:', user.id);
+  done(null, user.id);
+    console.log('Serializing user:', user.id);
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        console.log('Deserializing user:', id);
+        const user = await User.findById(id);
+        if (!user) {
+            console.log('User not found during deserialization');
+            return done(null, false);
+        }
+        console.log('User found:', user.displayName);
+        done(null, user);
+    } catch (err) {
+        console.error('Error during deserialization:', err);
+        done(err, null);
+    }
+});
+//spotify login strategy using spotify-passportjs
+passport.use(
+    new SpotifyStrategy(
+        {
+            clientID: CLIENT_ID,
+            clientSecret: CLIENT_SECRET,
+            callbackURL: `${HOST}${authCallbackPath}`,
+            passReqToCallback: true,
+        },
+        async (req, accessToken, refreshToken, expires_in, profile, done) => {
+            try {
+                //let user = await User.findOne({ spotifyId: profile.id });
+                let user = await User.findOne({spotifyId: profile.id });
+
+                if (!user) {
+                    console.log('Creating new user with Spotify ID:', profile.id);
+                    user = new User({
+                        spotifyId: profile.id,
+                        displayName: profile.displayName,
+                        accessToken,
+                        refreshToken,
+                    });
+                    await user.save();
+                    console.log('New user created successfully:', profile.displayName);
+                } else {
+                    console.log('Updating existing user:', profile.displayName);
+                    user.accessToken = accessToken;
+                    user.refreshToken = refreshToken;
+                    await user.save();
+                }
+                return done(null, user);
+            } catch (err) {
+                console.error('Error in authentication process:', err);
+                return done(err, null);
+            }
+        }
+    )
+);
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// CORS configuration
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:59442'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(session({
+    secret: SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // set to true in production
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax'
+    },
+    store: new session.MemoryStore() // For development only
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+//all the endpoints for web app
+// Authentication Routes
+app.get('/api/auth/spotify',
+    passport.authenticate('spotify', {
+        scope: [
+            'user-read-email',
+            'user-read-private',
+            'user-top-read',
+            'user-read-recently-played',
+            'user-read-currently-playing',
+            'user-read-playback-state'
+        ],
+        showDialog: true,
+        callbackURL: `${HOST}${authCallbackPath}`
+    })
+);
+
+app.get(authCallbackPath,
+    passport.authenticate('spotify', { failureRedirect: `${FRONTEND_URL}/login` }),
+    async (req, res) => {
+        console.log('Authentication successful, user:', req.user);
+        const user = await User.findById(req.user._id);
+
+        if (!user.profileComplete) {
+            res.redirect(`${FRONTEND_URL}/complete-profile`);
+        } else {
+            res.redirect(`${FRONTEND_URL}/home`);
+        }
+    }
+);
+
+// Route to check authentication status
+app.get('/api/auth/status', (req, res) => {
+    res.json({
+        authenticated: req.isAuthenticated(),
+        user: req.user
+    });
+});
+
+// Profile completion endpoint
+app.post('/api/complete-profile', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const { username, bio, profilePicture } = req.body;
+        const user = await User.findById(req.user._id);
+
+        user.username = username;
+        user.bio = bio;
+        user.profilePicture = profilePicture;
+        user.profileComplete = true;
+
+        await user.save();
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update profile' });
+    }
+});
+
+// Friend management endpoints
+app.post('/api/friends/request', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const { targetUserId } = req.body;
+        const user = await User.findById(req.user._id);
+        const targetUser = await User.findById(targetUserId);
+
+        if (!targetUser) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (!targetUser.friendRequests.includes(user._id)) {
+            targetUser.friendRequests.push(user._id);
+            await targetUser.save();
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to send friend request' });
+    }
+});
+
+app.post('/api/friends/accept', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const { requesterId } = req.body;
+        const user = await User.findById(req.user._id);
+        const requester = await User.findById(requesterId);
+
+        if (!requester) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Remove friend request
+        user.friendRequests = user.friendRequests.filter(id => !id.equals(requesterId));
+
+        // Add each other as friends
+        if (!user.friends.includes(requesterId)) {
+            user.friends.push(requesterId);
+        }
+        if (!requester.friends.includes(user._id)) {
+            requester.friends.push(user._id);
+        }
+
+        await Promise.all([user.save(), requester.save()]);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to accept friend request' });
+    }
+});
+
+// Get user's recent tracks
+app.get('/api/tracks/recent', async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    try {
+        const response = await axios.get('https://api.spotify.com/v1/me/player/recently-played', {
+            headers: { 'Authorization': `Bearer ${req.user.accessToken}` }
+        });
+
+        const tracks = response.data.items.map(item => ({
+            trackId: item.track.id,
+            trackName: item.track.name,
+            artistName: item.track.artists[0].name,
+            albumArt: item.track.album.images[0]?.url,
+            playedAt: item.played_at
+        }));
+
+        // Update user's recent tracks
+        const user = await User.findById(req.user._id);
+        user.recentTracks = tracks;
+        user.lastUpdated = new Date();
+        await user.save();
+
+        res.json(tracks);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch recent tracks' });
+    }
+});
+//update profile(user credentials) will be used for username and profile picture for new users
+app.post('/api/setup-profile', async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+
+  try {
+    const { username } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if username is already taken
+    const existingUser = await User.findOne({ username });
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      return res.status(400).json({ error: 'Username already taken' });
+    }
+
+    user.username = username;
+    user.profileComplete = true;
+    await user.save();
+
+    res.json({ message: 'Profile updated successfully', user });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ error: 'Error updating profile' });
+  }
+});
+// Logout route
+app.post('api/logout', (req, res) => {
+    req.logout(function(err) {
+        if (err) {
+            return res.status(500).json({ success: false, message: "Error during logout" });
+        }
+        req.session.destroy();
+        res.json({ success: true });
+    });
+});
+// Delete user from DB
+app.delete('/api/users/:spotifyId', async(req,res) => {
+  try{
+    const {spotifyId} = req.params;
+    const result = await User.findByIdAndDelete({spotifyId});
+    if(!result){
+      return res.status(404).json({message : 'User not found'});
+    }
+    res.json({message: 'User deleted succesfully'});
+  }catch(err){
+    res.status(500).json({message: 'Error trying to delete user'});
+  }
+});
+//retrieve a user's feed (friends's top 3 monthly songs)
+app.get('/api/feed/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // Get the current month in "YYYY-MM" format
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    // Find the current user and populate their friends field
+    const user = await User.findById(userId).populate('friends');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+  
+    // Build the feed: for each friend, retrieve their top tracks for the current month.
+    const feed = user.friends.map(friend => {
+      let topTracks = [];
+      if (friend.monthlyTopTracks && friend.monthlyTopTracks.get(currentMonth)) {
+        topTracks = friend.monthlyTopTracks.get(currentMonth);
+      }
+      return {
+        friendId: friend._id,
+        username: friend.username || friend.displayName,
+        profilePicture: friend.profilePicture,
+        topTracks: topTracks
+      };
+    });
+    
+    res.json({ feed });
+  } catch (error) {
+    console.error('Error fetching feed:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+//sending friend request endpoint
+app.post('/api/friend-request', async (req,res) => {
+  try{
+  const {userId, friendId} = req.body;
+  const user = await User.findById(userId);
+  const friend = await User.findById(friendId);
+  if(!user || !friend){
+    return res.status(404).json({message: 'User or friend not found'});
+  }
+  if(friend.pendingFriendRequests.includes(userId)){
+    return res.status(400).json({message: 'Friend request already sent'});
+  }
+  friend.pendingFriendRequests.push(userId);
+  await friend.save();
+  user.sentFriendRequests.push(friendId);
+  return res.json({message: "Sent friend request"});
+}catch(error){
+  return res.status(500).json({message: 'Error sending friend request'});
+}
+});
+//accepting friend request endpoint
+app.post('/api/friend-request/accept', async (req,res) =>{
+  try{const {userId, friendId} = req.body;
+  const user = await User.findById(userId);
+  const friend = await User.findById(friendId);
+  if(!user || !friend){
+    return res.status(404).json({message: 'User or friend not found'});
+  }
+  if(!user.pendingFriendRequests(friendId)){
+    return res.status(400).json({message: 'Friend request from this user does not exist'});
+  }
+  user.pendingFriendRequests.pull(friendId);
+  friend.sentFriendRequests.pull(userId);
+  if(!user.friends.includes(friendId)){
+    user.friends.push(friendId);
+  }
+  if(!friend.friends.includes(userId)){
+    friend.friends.push(userId);
+  }
+  await user.save();
+  await friend.save();
+  return res.status(400).json({message: "Accepted friend request"});
+}catch(error){
+    return res.status(500).json({message: 'Error accepting friend request'});
+}
+});  
+//get friend requests to appear (frontend)
+app.get('/api/friend-requests/:userId', async(req,res) => {
+try{
+const {userId} = req.params;
+if(!req.user){
+  return res.status(401).json({message: 'Not allowed to do this'});
+}
+const user = await User.findById(req.user._id)
+  .populate('pendingFriendRequests', 'displayName username profilePicture');
+if(!user){
+  return res.status(401).json({message: 'User not found'});
+}
+res.json({pendingFriendRequests: user.pendingFriendRequests});
+}catch(error){
+  return res.status(500).json({message: 'Error populating friend requests'});
+}
+});
+//decline friend request
+app.delete('/api/friend-requests/decline/:senderId', async(req,res) => {
+try{
+  const {senderId} = req.params;
+if(!req.user){
+  return res.status(401).json({message: 'Not allowed to do this'});
+}
+const userId = await User.findById(req.user._id);
+if(!userId){
+  return res.status(401).json({message: 'User not found'});
+}
+userId.pendingFriendRequests.pull(senderId);
+await userId.save();
+const sender = await User.findById(senderId);
+if(senderId) {
+  sender.sentFriendRequests.pull(req.user._id);
+  await sender.save();
+}
+req.json({message: 'Declined friend request'});
+}catch(error){
+  return res.status(500).json({message: 'Could not delete friend request'});
+}
+});
+//delete friend
+app.delete('/api/friends/:friendId', async(req,res) => {
+try{
+const {friendId} = req.params;
+if(!req.user){
+  return res.status(401).json({message: 'Not allowed to do this'});
+}
+const userId = await User.findById(req.user._id);
+if(!userId){
+  return res.status(401).json({message: 'User not found'});
+}
+userId.friends.pull(friendId);
+await userId.save();
+const friend = await User.findById(friendId);
+if(friend){
+  friend.friends.pull(req.user._id);
+  await friend.save();
+}
+return res.json({message: 'Succesfully deleted friend'});
+}catch(error){
+  return res.status(500).json({message: 'Could not delete friend'});
+}
+});
+//query profile for a friend
+app.get('/api/search/:userId', async(req,res) => {
+try{
+const {userId} = req.params;
+const user = await User.findById(userId).select('displayName profilePicture spotifyId');
+if(!user){
+  return res.status(401).json({message: 'User not found'});
+}
+res.json({user});
+}catch(error){
+return res.status(500).json({message: 'Could not find profile'});
+}
+});
+module.exports = app;  // Export the app for testing
+
+// Only start the server if this file is run directly (i.e., not required by another module).
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+//userId = var holding user's identifier extracted from request
+//req.user._id = unique identifier of currently authenticated user
+//User = mongoose model for users, perform CRUD ops. with this
