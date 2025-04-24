@@ -12,9 +12,9 @@ import spotifyRoutes from './routes/spotify.js';
 import User from './models/User.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 5001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/wrapped_db';
+const MONGODB_URI = process.env.MONGODB_URI;
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 
@@ -54,8 +54,9 @@ passport.use(
     {
       clientID: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      callbackURL: 'http://localhost:3001/api/spotify/callback',
+      callbackURL: `http://localhost:3001/api/spotify/callback`,
     },
+
     async (accessToken, refreshToken, expires_in, profile, done) => {
       try {
         let user = await User.findOne({ spotifyId: profile.id });
@@ -90,13 +91,12 @@ passport.use(
 
 // Connect to MongoDB Atlas
 mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  retryWrites: true,
+   retryWrites: true,
   w: 'majority'
 })
 .then(() => console.log('Connected to MongoDB Atlas'))
 .catch(err => console.error('MongoDB Connection Error:', err));
+
 
 // Routes
 app.use('/api/auth', authRoutes);

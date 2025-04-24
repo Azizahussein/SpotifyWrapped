@@ -18,21 +18,23 @@ router.get('/login', (req, res) => {
       response_type: 'code',
       client_id: process.env.SPOTIFY_CLIENT_ID,
       scope: scope,
-      redirect_uri: 'http://localhost:3001/api/spotify/callback',
-      state: userId // Pass the user ID from the query
+      redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+      state: userId, // Pass the user ID from the query
+      show_dialog: 'true' 
     }));
 });
 
 // Spotify OAuth callback
 router.get('/callback', async (req, res) => {
   const { code, state } = req.query;
+  console.log("Received state:", state);  // Log the state to verify
   const userId = state; // This is the user ID we passed earlier
 
   try {
     // Find the user
     const user = await User.findById(userId);
     if (!user) {
-      return res.redirect('http://localhost:3001/error?message=user_not_found');
+      return res.redirect('http://localhost:3000/error?message=user_not_found');
     }
 
     // Exchange code for tokens
@@ -46,7 +48,7 @@ router.get('/callback', async (req, res) => {
       },
       body: querystring.stringify({
         code: code,
-        redirect_uri: 'http://localhost:3001/api/spotify/callback',
+        redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
         grant_type: 'authorization_code'
       })
     });
@@ -54,7 +56,7 @@ router.get('/callback', async (req, res) => {
     const data = await response.json();
     if (data.error) {
       console.error('Spotify token error:', data.error);
-      return res.redirect('http://localhost:3001/error?message=spotify_token_error');
+      return res.redirect('http://localhost:3000/error?message=spotify_token_error');
     }
 
     // Get user profile from Spotify
@@ -75,14 +77,14 @@ router.get('/callback', async (req, res) => {
     await user.save();
 
     // Redirect back to frontend with success
-    res.redirect('http://localhost:3001/mainpage?success=true');
+    res.redirect('http://localhost:3000/mainpage?success=true');
   } catch (error) {
     console.error('Spotify callback error:', error);
-    res.redirect('http://localhost:3001/error');
+    res.redirect('http://localhost:3000/error');
   }
 });
 
-// Get user's top tracks
+// Get user's top tracks (refreshes token if expired)
 router.get('/top-tracks', async (req, res) => {
   try {
     const { userId } = req.query;
@@ -94,11 +96,11 @@ router.get('/top-tracks', async (req, res) => {
     if (!user || !user.isSpotifyConnected) {
       return res.status(400).json({ error: 'User not found or Spotify not connected' });
     }
-    
-    // Check if token needs refresh
+
+    // Refresh token if expired
     if (new Date() >= user.tokenExpiresAt) {
-      // Refresh token
-      const response = await fetch('https://accounts.spotify.com/api/token', {
+      console.log('Token expired, refreshing...');
+      const refreshResponse = await fetch('https://accounts.spotify.com/api/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -112,27 +114,33 @@ router.get('/top-tracks', async (req, res) => {
         })
       });
 
-      const data = await response.json();
-      if (data.error) {
-        console.error('Token refresh error:', data.error);
+      const refreshData = await refreshResponse.json();
+      console.log('Refresh token response:', refreshData);
+
+      if (refreshData.error) {
+        console.error('Token refresh error:', refreshData.error);
         return res.status(401).json({ error: 'Failed to refresh token' });
       }
 
-      user.spotifyAccessToken = data.access_token;
-      user.tokenExpiresAt = new Date(Date.now() + data.expires_in * 1000);
+      user.spotifyAccessToken = refreshData.access_token;
+      user.tokenExpiresAt = new Date(Date.now() + refreshData.expires_in * 1000);
       await user.save();
     }
 
-    const response = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=short_term', {
+    console.log("Using access token:", user.spotifyAccessToken);
+
+    const tracksResponse = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=short_term', {
       headers: {
         'Authorization': 'Bearer ' + user.spotifyAccessToken
       }
     });
 
-    const data = await response.json();
+    const data = await tracksResponse.json();
+    console.log("Spotify top tracks response:", data);
+
     if (data.error) {
       console.error('Spotify API error:', data.error);
-      return res.status(500).json({ error: 'Failed to fetch top tracks' });
+      return res.status(500).json({ error: 'Failed to fetch top tracks', details: data.error });
     }
 
     const tracks = data.items.map(track => ({
@@ -147,7 +155,7 @@ router.get('/top-tracks', async (req, res) => {
 
     res.json({ tracks });
   } catch (error) {
-    console.error('Error fetching top tracks:', error);
+    console.error('Unhandled error in /top-tracks:', error);
     res.status(500).json({ error: 'Failed to fetch top tracks' });
   }
 });

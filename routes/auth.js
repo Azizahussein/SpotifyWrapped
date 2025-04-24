@@ -2,13 +2,14 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import querystring from 'querystring';
 
 const router = express.Router();
 
 // Register new user
 router.post('/register', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, password, email } = req.body;
 
     // Check if username already exists
     const existingUser = await User.findOne({ username });
@@ -24,11 +25,16 @@ router.post('/register', async (req, res) => {
       username,
       password: hashedPassword,
       fullName: username, // Using username as fullName initially
-      email: `${username}@wrapped.com`, // Temporary email format
+      email: email || `${username}@wrapped.com`, // Use email if provided, otherwise fallback to temporary format
+      isSpotifyConnected: false, // Set this to false until Spotify is linked
     });
 
     await user.save();
 
+    // Use string form of ObjectId
+    const userId = user.id;
+
+   
     // Create JWT token
     const token = jwt.sign(
       { userId: user._id },
@@ -36,22 +42,33 @@ router.post('/register', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+     // Spotify login URL
+    const spotifyLoginUrl = `https://accounts.spotify.com/authorize?` +
+    querystring.stringify({
+      response_type: 'code',
+      client_id: process.env.SPOTIFY_CLIENT_ID,
+      scope: 'user-read-private user-read-email user-top-read',
+      redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
+      state: userId,
+      show_dialog: 'true' 
+    });
+    // Log the URL for debugging purposes
+    console.log("Generated Spotify Login URL:", spotifyLoginUrl);
+
     res.status(201).json({
+      _id: user._id,
       message: 'User registered successfully',
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        isSpotifyConnected: user.isSpotifyConnected
-      }
+      username: user.username,
+      isSpotifyConnected: user.isSpotifyConnected,
+      spotifyLoginUrl: spotifyLoginUrl 
     });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Error registering user' });
   }
 });
-
-// Login endpoint
+// Fetch all users (without password)
 router.get('/users', async (req, res) => {
   try {
     const users = await User.find({}, { password: 0 }); // Don't return passwords
@@ -62,6 +79,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
+// Login endpoint
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
