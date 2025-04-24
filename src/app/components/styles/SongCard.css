@@ -1,0 +1,117 @@
+.song-card.small {
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* remove padding so image can be flush */
+    margin: 1rem;
+    max-width: 240px;
+    background: #f7efff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    overflow: hidden; /* make sure the image and content fit inside the rounded card */
+  }
+  
+  .song-card.small:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .song-card.small .album-art {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 0; /* no rounded corners on the image itself */
+    margin: 0; /* no margin above or below */
+  }
+  
+  /* Ensure the image fills the top of the card without padding */
+  .song-card.small .song-info {
+    padding: 1rem;
+    background: #f7efff;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  .song-card.small .song-info h4 {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  .song-card.small .song-info p {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+  }
+  
+  .icon {
+    margin-right: 0.4rem;
+    color: #e0245e;
+  }
+  
+  
+  /* 🔸 Grid container (used in MainPage.css or wherever your grid is) */
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    margin: 0 auto;
+    max-width: 1200px;
+    box-sizing: border-box;
+  }
+  .song-card.large {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    margin: 1rem auto;
+    max-width: 800px;
+    height: 250px;
+    background: #f7efff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+  
+  .song-card.large:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  }
+  
+  .song-card.large .album-art {
+    width: 250px;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px 0 0 12px;
+    margin: 0;
+    display: block;
+  }
+  
+  .song-card.large .song-info {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: #f7efff;
+    box-sizing: border-box;
+  }
+  
+  .song-card.large .song-info h4 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: #333;
+  }
+  
+  .song-card.large .song-info p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0.5rem 0;
+    color: #555;
+  }
+  
+  .icon {
+    margin-right: 0.4rem;
+    color: #e0245e;
+  }
+  

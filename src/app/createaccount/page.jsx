@@ -10,36 +10,55 @@ const CreateAccount = () => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [spotifyLinked, setSpotifyLinked] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSpotifyLink = () => {
-    window.open("https://accounts.spotify.com/en/login", "_blank");
-    setSpotifyLinked(true);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!username || !password || !spotifyLinked) {
-      setError("All fields are required, including linking Spotify.");
+    if (!username || !password) {
+      setError("Please fill in all fields.");
       return;
     }
 
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("username", username);
-    router.push("/mainpage");
+    const accountData = {
+      username,
+      password,
+      email: `${username}@wrapped.com`,
+    };
+
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(accountData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("userId", data._id); // Store userId
+        localStorage.setItem("username", data.username); // Store username
+
+        console.log('Spotify Login URL:', data.spotifyLoginUrl);
+        window.location.href = data.spotifyLoginUrl;
+      } else {
+        setError(data.error || "An error occurred while creating the account.");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError("An error occurred. Please try again.");
+    }
   };
 
   return (
     <div className="page">
       <div className="container">
         <div className="box">
-          <Link href="/" className="back">&#8592;</Link>
-
+          <Link href="/" className="back">&#8592; Back to Home</Link>
           <h1>Create Account</h1>
           <p className="text">Enter your info and link your Spotify account</p>
-
           {error && <p className="error">{error}</p>}
 
           <form onSubmit={handleSubmit} noValidate>
@@ -59,15 +78,9 @@ const CreateAccount = () => {
               required
             />
 
-            <button
-              type="button"
-              className={`btn spotify ${spotifyLinked ? "linked" : ""}`}
-              onClick={handleSpotifyLink}
-            >
-              {spotifyLinked ? "Spotify Linked ✅" : "Login with Spotify"}
+            <button type="submit" className="btn">
+              Create Account & Link Spotify
             </button>
-
-            <button type="submit" className="btn">Create Account</button>
           </form>
 
           <div className="link">
@@ -78,7 +91,9 @@ const CreateAccount = () => {
 
       <div className="login">
         <div className="welcome">
-          <h2>Welcome to <span>WRAPPED</span></h2>
+          <h2>
+            Welcome to <span>WRAPPED</span>
+          </h2>
           <p>Where music connects us all 🎵</p>
         </div>
       </div>

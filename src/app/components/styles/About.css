@@ -1,0 +1,54 @@
+/* About Page Styling with Gradient Background */
+body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(
+      circle,
+      rgba(178, 131, 214, 1) 0%,
+      rgba(119, 41, 179, 1) 50%,
+      rgba(7, 51, 133, 1) 100%
+    );
+    color: white;
+    font-family: sans-serif;
+  }
+  
+  .section {
+    padding: 4rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .section h2,
+  .section h3 {
+    font-weight: bold;
+    color: white;
+    margin-bottom: 1.5rem;
+    animation: bounce 2s infinite;
+  }
+  
+ 
+  
+  .about-box {
+    background-color: rgba(255, 255, 255, 0.95);
+    color: black;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    text-align: left;
+  }
+  
+  .about-box p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  .card {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: black;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  }
+  

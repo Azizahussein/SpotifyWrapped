@@ -12,11 +12,7 @@ function Navbar() {
 
   useEffect(() => {
     const loginStatus = localStorage.getItem("loggedIn");
-    if (loginStatus === "true") {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+    setIsLoggedIn(loginStatus === "true");
   }, [pathname]);
 
   function handleButtonClick() {
@@ -29,6 +25,10 @@ function Navbar() {
     }
   }
 
+  function navigateTo(path) {
+    router.push(path);
+  }
+
   let buttonText = "Login";
   if (pathname === "/mainpage" && isLoggedIn) {
     buttonText = "Logout";
@@ -37,20 +37,20 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="left">
-        <h1 className="logo">Wrapped</h1>
+        <h1 className="logo" onClick={() => navigateTo("/mainpage")} style={{ cursor: "pointer" }}>
+          Wrapped
+        </h1>
         <div className="menu">
-          <span className="option">Home</span>
+          <span className="option" onClick={() => navigateTo("/mainpage")}>Home</span>
           <span>|</span>
-          <span className="option">About Us</span>
+          <span className="option" onClick={() => navigateTo("/about")}>About Us</span>
           <span>|</span>
-          <span className="option">Contact Us</span>
+          <span className="option" onClick={() => navigateTo("/contact")}>Contact Us</span>
         </div>
       </div>
 
-      <div className="right">
-        <div onClick={handleButtonClick}>
-          <Button text={buttonText} />
-        </div>
+      <div className="right" onClick={handleButtonClick}>
+        <Button text={buttonText} />
       </div>
     </nav>
   );
