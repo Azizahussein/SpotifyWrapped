@@ -160,4 +160,40 @@ router.get('/top-tracks', async (req, res) => {
   }
 });
 
+
+//FRIENDS TRACKS
+// Get top tracks of other users
+router.get('/friends-top-tracks', async (req, res) => {
+  const { userId } = req.query;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+    const users = await User.find({
+      _id: { $ne: userId },
+      isSpotifyConnected: true,
+      topTracks: { $exists: true, $ne: [] }
+    });
+
+    const friendsData = users.map(user => ({
+      username: user.username || "Friend",
+      topTrack: user.topTracks[0] ? {
+        trackId: user.topTracks[0].trackId,
+        trackName: user.topTracks[0].trackName,
+        artistName: user.topTracks[0].artistName,
+        albumArt: user.topTracks[0].albumArt
+      } : null
+    })).filter(friend => friend.topTrack);
+
+    res.json({ friends: friendsData });
+  } catch (err) {
+    console.error('Error fetching friends top tracks:', err);
+    res.status(500).json({ error: 'Server error fetching friends\' top tracks' });
+  }
+});
+
+
+
 export default router;
