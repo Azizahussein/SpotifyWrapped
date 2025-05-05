@@ -114,4 +114,17 @@
     margin-right: 0.4rem;
     color: #e0245e;
   }
+  .like-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .like-button .liked {
+    color: red;
+  }
   

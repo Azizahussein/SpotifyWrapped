@@ -41,7 +41,7 @@ function Navbar() {
           Wrapped
         </h1>
         <div className="menu">
-          <span className="option" onClick={() => navigateTo("/mainpage")}>Home</span>
+          <span className="option" onClick={() => navigateTo("/")}>Home</span>
           <span>|</span>
           <span className="option" onClick={() => navigateTo("/about")}>About Us</span>
           <span>|</span>

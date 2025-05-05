@@ -31,16 +31,30 @@ const Login = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Successful login
-        localStorage.setItem('authToken', data.token);
+        console.log("Login successful. Response data:", data);
+
+        const userId = data._id || data.userId || data.user?._id;
+        const username = data.username || data.user?.username;
+        const token = data.token;
+  
+        if (!userId || !username || !token) {
+          console.error("Missing fields in login response:", data);
+          setErrorMessage("Login failed: Missing user data.");
+          return;
+        }
+  
+       
+        localStorage.setItem("authToken", token);
         localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("username", data.username);
+        localStorage.setItem("username", username);
+        localStorage.setItem("userId", userId);
+  
         router.push("/mainpage");
       } else {
         setErrorMessage(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Login error:', error);
       setErrorMessage("An error occurred. Please try again.");
     }
   };
