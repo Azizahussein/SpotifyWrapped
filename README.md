@@ -1,3 +1,16 @@
+# Spotify Wrapped Web App
+
+A personalized Spotify Wrapped-style website built using [Next.js](https://nextjs.org) and the [Spotify Web API](https://developer.spotify.com/documentation/web-api/).  
+Users can sign in with their Spotify account, create a profile, and view their top artists, tracks, genres, and more—all in a clean, responsive UI.
+
+## Features
+
+- 🔐 Spotify OAuth login  
+- 📊 Personalized music stats (top tracks, artists, genres, etc.)  
+- 🌀 Dynamic wrapped-style summaries
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
